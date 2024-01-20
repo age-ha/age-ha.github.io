@@ -1,0 +1,537 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="如何将 Python 2 代码移植到 Python 3" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://docs.python.org/3/howto/pyporting.html" />
+<meta property="og:site_name" content="Python documentation" />
+<meta property="og:description" content="作者, Brett Cannon,. 摘要: Python 2 生命期在 2020 年初正式结束。 这意味着 Python 2 将不再接受新的错误报告、修复或更改。 本指南旨在为你的代码提供一条通往 Python 3 的路径，其中包括作为第一步的如何与 Python 2 兼容。 如果您希望迁移扩展模块而不是纯 Python 代码，请参阅 将扩展模块移植到 Python 3 。 已归档的 py..." />
+<meta property="og:image" content="https://docs.python.org/3/_static/og-image.png" />
+<meta property="og:image:alt" content="Python documentation" />
+<meta name="description" content="作者, Brett Cannon,. 摘要: Python 2 生命期在 2020 年初正式结束。 这意味着 Python 2 将不再接受新的错误报告、修复或更改。 本指南旨在为你的代码提供一条通往 Python 3 的路径，其中包括作为第一步的如何与 Python 2 兼容。 如果您希望迁移扩展模块而不是纯 Python 代码，请参阅 将扩展模块移植到 Python 3 。 已归档的 py..." />
+<meta property="og:image:width" content="200" />
+<meta property="og:image:height" content="200" />
+<meta name="theme-color" content="#3776ab" />
+
+    <title>如何将 Python 2 代码移植到 Python 3 &#8212; Python 3.12.1 文档</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pydoctheme.css?digest=b37c26da2f7529d09fe70b41c4b2133fe4931a90" />
+    <link id="pygments_dark_css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css" href="../_static/pygments_dark.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    
+    <script src="../_static/sidebar.js"></script>
+    
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="在 Python 3.12.1 文档 中搜索"
+          href="../_static/opensearch.xml"/>
+    <link rel="author" title="关于这些文档" href="../about.html" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="copyright" title="版权所有" href="../copyright.html" />
+    <link rel="next" title="将扩展模块移植到 Python 3" href="cporting.html" />
+    <link rel="prev" title="Python 指南" href="index.html" />
+    <link rel="canonical" href="https://docs.python.org/3/howto/pyporting.html" />
+    
+      
+    
+
+    
+    <style>
+      @media only screen {
+        table.full-width-table {
+            width: 100%;
+        }
+      }
+    </style>
+<link rel="stylesheet" href="../_static/pydoctheme_dark.css" media="(prefers-color-scheme: dark)" id="pydoctheme_dark_css">
+    <link rel="shortcut icon" type="image/png" href="../_static/py.svg" />
+            <script type="text/javascript" src="../_static/copybutton.js"></script>
+            <script type="text/javascript" src="../_static/menu.js"></script>
+            <script type="text/javascript" src="../_static/search-focus.js"></script>
+            <script type="text/javascript" src="../_static/themetoggle.js"></script> 
+
+  </head>
+<body>
+<div class="mobile-nav">
+    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
+           aria-pressed="false" aria-expanded="false" role="button" aria-label="Menu" />
+    <nav class="nav-content" role="navigation">
+        <label for="menuToggler" class="toggler__label">
+            <span></span>
+        </label>
+        <span class="nav-items-wrapper">
+            <a href="https://www.python.org/" class="nav-logo">
+                <img src="../_static/py.svg" alt="Logo"/>
+            </a>
+            <span class="version_switcher_placeholder"></span>
+            <form role="search" class="search" action="../search.html" method="get">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
+                    <path fill-rule="nonzero" fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                </svg>
+                <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" />
+                <input type="submit" value="转向"/>
+            </form>
+        </span>
+    </nav>
+    <div class="menu-wrapper">
+        <nav class="menu" role="navigation" aria-label="main navigation">
+            <div class="language_switcher_placeholder"></div>
+            
+<label class="theme-selector-label">
+    Theme
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>Auto</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+    </select>
+</label>
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">如何将 Python 2 代码移植到 Python 3</a><ul>
+<li><a class="reference internal" href="#the-short-explanation">简要说明</a></li>
+<li><a class="reference internal" href="#details">详情</a><ul>
+<li><a class="reference internal" href="#different-versions-of-python-2">Python 2 的不同版本</a></li>
+<li><a class="reference internal" href="#make-sure-you-specify-the-proper-version-support-in-your-setup-py-file">确保你在你的 <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> 文件中指定适当的版本支持</a></li>
+<li><a class="reference internal" href="#have-good-test-coverage">良好的测试覆盖率</a></li>
+<li><a class="reference internal" href="#be-aware-of-the-differences-between-python-2-and-3">了解 Python 2 和 Python 3 之间的区别</a></li>
+<li><a class="reference internal" href="#update-your-code">更新代码</a><ul>
+<li><a class="reference internal" href="#division">除法</a></li>
+<li><a class="reference internal" href="#text-versus-binary-data">文本与二进制数据</a></li>
+<li><a class="reference internal" href="#use-feature-detection-instead-of-version-detection">使用特征检测而不是版本检测</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prevent-compatibility-regressions">防止兼容性退步</a></li>
+<li><a class="reference internal" href="#check-which-dependencies-block-your-transition">检查哪些依赖性会阻碍你的过渡</a></li>
+<li><a class="reference internal" href="#update-your-setup-py-file-to-denote-python-3-compatibility">更新你的 <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> 文件以表示对Python 3的兼容</a></li>
+<li><a class="reference internal" href="#use-continuous-integration-to-stay-compatible">使用持续集成以保持兼容</a></li>
+<li><a class="reference internal" href="#consider-using-optional-static-type-checking">考虑使用可选的静态类型检查</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一个主题</h4>
+    <p class="topless"><a href="index.html"
+                          title="上一章">Python 指南</a></p>
+  </div>
+  <div>
+    <h4>下一个主题</h4>
+    <p class="topless"><a href="cporting.html"
+                          title="下一章">将扩展模块移植到 Python 3</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>当前页面</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告 Bug</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/pyporting.rst"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+    </ul>
+  </div>
+        </nav>
+    </div>
+</div>
+
+  
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总目录"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="cporting.html" title="将扩展模块移植到 Python 3"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Python 指南"
+             accesskey="P">上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="python logo" style="vertical-align: middle; margin-top: -1px"/></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.12.1 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">如何将 Python 2 代码移植到 Python 3</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box" />
+          <input type="submit" value="转向" />
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    Theme
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>Auto</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>    
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="how-to-port-python-2-code-to-python-3">
+<span id="pyporting-howto"></span><h1>如何将 Python 2 代码移植到 Python 3<a class="headerlink" href="#how-to-port-python-2-code-to-python-3" title="永久链接至标题">¶</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">作者</dt>
+<dd class="field-odd"><p>Brett Cannon</p>
+</dd>
+</dl>
+<div class="topic">
+<p class="topic-title">摘要</p>
+<p>Python 2 生命期在 2020 年初正式结束。 这意味着 Python 2 将不再接受新的错误报告、修复或更改。</p>
+<p>本指南旨在为你的代码提供一条通往 Python 3 的路径，其中包括作为第一步的如何与 Python 2 兼容。</p>
+<p>如果您希望迁移扩展模块而不是纯 Python 代码，请参阅 <a class="reference internal" href="cporting.html#cporting-howto"><span class="std std-ref">将扩展模块移植到 Python 3</span></a>。</p>
+<p>已归档的 <a class="reference external" href="https://mail.python.org/pipermail/python-porting/">python-porting</a> 邮件列表可能包含一些有用的指导。</p>
+</div>
+<section id="the-short-explanation">
+<h2>简要说明<a class="headerlink" href="#the-short-explanation" title="永久链接至标题">¶</a></h2>
+<p>要在单一代码库中实现 Python 2/3 兼容性，基本步骤如下：</p>
+<ol class="arabic simple">
+<li><p>只担心支持Python 2.7的问题</p></li>
+<li><p>确保你有良好的测试覆盖率（可以用 <a class="reference external" href="https://pypi.org/project/coverage">coverage.py</a>；<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">coverage</span></code>）。</p></li>
+<li><p>了解 Python 2 和 Python 3 之间的区别</p></li>
+<li><p>使用 <a class="reference external" href="https://python-future.org/automatic_conversion.html">Futurize</a> (<a class="reference external" href="https://python-modernize.readthedocs.io/">或Modernize</a>) 来更新你的代码 (例如 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">future</span></code>)。</p></li>
+<li><p>使用 <a class="reference external" href="https://pypi.org/project/pylint">Pylint</a> 来帮助确保你在Python 3支持上不倒退(<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pylint</span></code>)</p></li>
+<li><p>使用 <a class="reference external" href="https://pypi.org/project/caniusepython3">caniusepython3</a> 来找出你的哪些依赖关系阻碍了你对 Python 3 的使用 (<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">caniusepython3</span></code>)</p></li>
+<li><p>一旦你的依赖关系不再阻碍你，请使用持续集成来确保 Python 2 与 3 的兼容 (<a class="reference external" href="https://pypi.org/project/tox">tox</a> 可以帮助针对多个 Python 版本进行测试; <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">tox</span></code>)</p></li>
+<li><p>考虑使用可选的 <a class="reference internal" href="../glossary.html#term-static-type-checker"><span class="xref std std-term">静态类型检查</span></a> 来确保你的类型用法在 Python 2 和 3 中都能正常工作 (例如使用 <a class="reference external" href="https://mypy-lang.org/">mypy</a> 同时在 Python 2 和 Python 3 中检查你的类型标注; <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">mypy</span></code>)。</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">备注</p>
+<p>注意：使用 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span></code> 来确保你发起调用的 <code class="docutils literal notranslate"><span class="pre">pip</span></code> 就是当前使用的 Python 所安装的那一个，无论它是系统级的 <code class="docutils literal notranslate"><span class="pre">pip</span></code> 还是安装在 <a class="reference internal" href="../tutorial/venv.html#tut-venv"><span class="std std-ref">虚拟环境</span></a> 中的。</p>
+</div>
+</section>
+<section id="details">
+<h2>详情<a class="headerlink" href="#details" title="永久链接至标题">¶</a></h2>
+<p>即使有其他因素 —— 比如说，你无法控制的依赖关系 —— 仍然要求你支持 Python 2，也不妨碍你着手包括对 Python 3 的支持。</p>
+<p>支持 Python 3 所需的大多数更改都会使得代码更简洁，甚至在 Python 2 代码中也能应用新的实践。</p>
+<section id="different-versions-of-python-2">
+<h3>Python 2 的不同版本<a class="headerlink" href="#different-versions-of-python-2" title="永久链接至标题">¶</a></h3>
+<p>在理想情况下，你的代码应当兼容 Python 2.7，这是 Python 2 最后一个受支持的版本。</p>
+<p>本指南中提到的某些工具将不适用于 Python 2.6。</p>
+<p>如果有绝对的必要，<a class="reference external" href="https://pypi.org/project/six">six</a> 项目可以帮助您同时支持 Python 2.5 和 3。 但是，需要注意，本指南中列出的几乎所有项目你都将无法使用。</p>
+<p>如果你能跳过 Python 2.5 或更早版本，那么对代码的修改将是极其微小的。 在最坏的情况下你将必须使用函数来代替某些实例的方法或者必须导入函数而不是使用某个内置函数。</p>
+</section>
+<section id="make-sure-you-specify-the-proper-version-support-in-your-setup-py-file">
+<h3>确保你在你的 <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> 文件中指定适当的版本支持<a class="headerlink" href="#make-sure-you-specify-the-proper-version-support-in-your-setup-py-file" title="永久链接至标题">¶</a></h3>
+<p>在你的 <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> 文件中，你应该有适当的 <a class="reference external" href="https://pypi.org/classifiers">trove classifier</a> 指定你支持哪些版本的 Python。由于你的项目还不支持 Python 3，你至少应该指定 <code class="docutils literal notranslate"><span class="pre">Programming</span> <span class="pre">Language</span> <span class="pre">::</span> <span class="pre">Python</span> <span class="pre">::</span> <span class="pre">2</span> <span class="pre">::</span> <span class="pre">Only</span></code>。理想情况下，你还应该指定你所支持的Python的每个主要/次要版本，例如：<code class="docutils literal notranslate"><span class="pre">Programming</span> <span class="pre">Language</span> <span class="pre">::</span> <span class="pre">Python</span> <span class="pre">::</span> <span class="pre">2.7</span></code>。.</p>
+</section>
+<section id="have-good-test-coverage">
+<h3>良好的测试覆盖率<a class="headerlink" href="#have-good-test-coverage" title="永久链接至标题">¶</a></h3>
+<p>一旦你的代码支持了你希望的Python 2的最老版本，你将希望确保你的测试套件有良好的覆盖率。一个好的经验法则是，如果你想对你的测试套件有足够的信心，在让工具重写你的代码后出现的任何故障都是工具中的实际错误，而不是你的代码中的错误。如果你想要一个目标数字，试着获得超过80%的覆盖率（如果你发现很难获得好于90%的覆盖率，也不要感到遗憾）。如果你还没有一个测量测试覆盖率的工具，<a class="reference external" href="https://pypi.org/project/coverage">那么推荐使用coverage.py</a>。</p>
+</section>
+<section id="be-aware-of-the-differences-between-python-2-and-3">
+<h3>了解 Python 2 和 Python 3 之间的区别<a class="headerlink" href="#be-aware-of-the-differences-between-python-2-and-3" title="永久链接至标题">¶</a></h3>
+<p>当你的代码经过充分的测试之后你就可以开始将代码移植到 Python 3 了！ 但是为了充分理解你的代码将如何变化以及在编写代码时需要注意什么，你需要学习 Python 3 对 Python 2 做了哪些改变。</p>
+<p>一些有助于理解这些差异及其对代码影响的资源：</p>
+<ul class="simple">
+<li><p>Python 3 每个发布版的 <a class="reference internal" href="../whatsnew/index.html#whatsnew-index"><span class="std std-ref">“有什么新变化”</span></a> 文档</p></li>
+<li><p><a class="reference external" href="http://python3porting.com/">Porting to Python 3</a> 电子书（免费在线版）</p></li>
+<li><p>来自 Python-Future 项目的方便的 <a class="reference external" href="https://python-future.org/compatible_idioms.html">cheat sheet</a>。</p></li>
+</ul>
+</section>
+<section id="update-your-code">
+<h3>更新代码<a class="headerlink" href="#update-your-code" title="永久链接至标题">¶</a></h3>
+<p>有一些工具可以自动移植你的代码。</p>
+<p><a class="reference external" href="https://python-future.org/automatic_conversion.html">Futurize</a> 尽其所能地让 Python 3 的惯用语法和实践在 Python 2 中存在，例如从 Python 3 反向移植 <code class="docutils literal notranslate"><span class="pre">bytes</span></code> 类型从而使 Python 的主要版本在语义上保持一致。 在大多数情况下这是更好的做法。</p>
+<p>而在另一方面，<a class="reference external" href="https://python-modernize.readthedocs.io/">Modernize</a> 更为保守并以 Python 2/3 的 Python 子集为目标，它直接依赖 <a class="reference external" href="https://pypi.org/project/six">six</a> 来帮助提供兼容性。</p>
+<p>一个很的做法是先在测试套件上运行工具然后可视化地检查差异以确保转换准确无误。 在转换测试套件并验证所有测试都能按预期通过后，你就可以转换应用程序代码了，因为你知道任何测试失败都是是转译的错误。</p>
+<p>不幸的是这些工具并不能自动化任何操作来使你的代码能在 Python 3 下运行，而且你还需要阅读工具的文档以防某些你所需要的选项被默认关闭。</p>
+<p>需要注意和检查的关键问题：</p>
+<section id="division">
+<h4>除法<a class="headerlink" href="#division" title="永久链接至标题">¶</a></h4>
+<p>在 Python 3 中，<code class="docutils literal notranslate"><span class="pre">5</span> <span class="pre">/</span> <span class="pre">2</span> <span class="pre">==</span> <span class="pre">2.5</span></code> 而不是 Python 2 中 <code class="docutils literal notranslate"><span class="pre">2</span></code>；所有 <code class="docutils literal notranslate"><span class="pre">int</span></code> 值之间的除法都会得到一个 <code class="docutils literal notranslate"><span class="pre">float</span></code> 值。 这个变化实际上从 2002 年发布的 Python 2.2 就已经计划好了。 从那时起我们就鼓励用户在所有使用 <code class="docutils literal notranslate"><span class="pre">/</span></code> 和 <code class="docutils literal notranslate"><span class="pre">//</span></code> 运算符的文件中添加 <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">__future__</span> <span class="pre">import</span> <span class="pre">division</span></code>，或者附带 <code class="docutils literal notranslate"><span class="pre">-Q</span></code> 旗标运行解释器。 如果你没有这样做，那么你需要检查你的代码并做两件事：</p>
+<ol class="arabic simple">
+<li><p>添加 <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">__future__</span> <span class="pre">import</span> <span class="pre">division</span></code> 到你的文件。</p></li>
+<li><p>根据需要更新任何除法运算符，要么使用 <code class="docutils literal notranslate"><span class="pre">//</span></code> 来使用向下取整除法，要么继续使用 <code class="docutils literal notranslate"><span class="pre">/</span></code> 并得到一个浮点数</p></li>
+</ol>
+<p>之所以没有简单地将 <code class="docutils literal notranslate"><span class="pre">/</span></code> 自动翻译成 <code class="docutils literal notranslate"><span class="pre">//</span></code>，是因为如果一个对象定义了一个 <code class="docutils literal notranslate"><span class="pre">__truediv__</span></code> 方法，但没有定义 <code class="docutils literal notranslate"><span class="pre">__floordiv__</span></code>，那么你的代码就会运行失败（例如，一个用户定义的类用 <code class="docutils literal notranslate"><span class="pre">/</span></code> 来表示一些操作，但没有用 <code class="docutils literal notranslate"><span class="pre">//</span></code> 来表示同样的事情或根本没有定义）。</p>
+</section>
+<section id="text-versus-binary-data">
+<h4>文本与二进制数据<a class="headerlink" href="#text-versus-binary-data" title="永久链接至标题">¶</a></h4>
+<p>在Python 2中，你可以对文本和二进制数据都使用 <code class="docutils literal notranslate"><span class="pre">str``类型。不幸的是，这两个不同概念的融合可能会导致脆弱的代码，有时对任何一种数据都有效，有时则无效。如果人们没有明确说明某种接受``str``东西可以接受文本或二进制数据，而不是一种特定的类型，这也会导致API的混乱。这使情况变得复杂，特别是对于任何支持多种语言的人来说，因为API在声称支持文本数据时不会显式支持``unicode</span></code>。</p>
+<p>Python 3 将文本和二进制数据区分为不同的类型而不能简单地混合在一起。 对于任何只处理文本或二进制数据的代码来说，这种区分并不构成问题。 但对于必须同时处理这两者的代码来说，这就意味着你现在可能必须关注何时使用文本而不是二进制数据，这也是为什么这无法完全自动化地操作。</p>
+<p>决定哪些 API 接受文本而哪些接受二进制数据 (<strong>强烈</strong> 建议不要设计同时接受这两种数据的 API 因为这很难保证代码正常工作；如前所述这一点是很难做好的)。 在 Python 2 中这意味着要确保处理文本的 API 可以使用 <code class="docutils literal notranslate"><span class="pre">unicode</span></code> 而处理二进制数据的 API 可以使用来自 Python 3 的 <code class="docutils literal notranslate"><span class="pre">bytes</span></code> 类型 (它是 Python 2 中 <code class="docutils literal notranslate"><span class="pre">str</span></code> 的子集并被作为 Python 2 中 <code class="docutils literal notranslate"><span class="pre">bytes</span></code> 类型的别名)。 通常最大的问题是要意识到哪些方法在 Python 2 和 Python 3 的哪些类型中同时存在 (对于文本来说在 Python 2 中是 <code class="docutils literal notranslate"><span class="pre">unicode</span></code> 而在 Python 3 中则是 <code class="docutils literal notranslate"><span class="pre">str</span></code>，对于二进制数据来说在 Python 2 中是 <code class="docutils literal notranslate"><span class="pre">str</span></code>/<code class="docutils literal notranslate"><span class="pre">bytes</span></code> 而在 Python 3 中则是 <code class="docutils literal notranslate"><span class="pre">bytes</span></code>)。</p>
+<p>下表列出了每种数据类型在 Python 2 和 3 中的 <strong>特有</strong> 方法（例如，<code class="docutils literal notranslate"><span class="pre">decode()</span></code> 方法在 Python 2 或 3 中都可用于等价的二进制数据类型，但文本数据类型无法在 Python 2 和 3 之间以一致的方式使用它因为 Python 3 中的 <code class="docutils literal notranslate"><span class="pre">str</span></code> 没有该方法）。 请注意从 Python 3.5 起 bytes 类型增加了 <code class="docutils literal notranslate"><span class="pre">__mod__</span></code> 方法。</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 47%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>文本数据</strong></p></td>
+<td><p><strong>二进制数据</strong></p></td>
+</tr>
+<tr class="row-even"><td><p></p></td>
+<td><p>decode</p></td>
+</tr>
+<tr class="row-odd"><td><p>encode</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>format</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>isdecimal</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>isnumeric</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>通过在你的代码边缘对二进制数据和文本进行编码和解码，可以使这种区分更容易处理。这意味着，当你收到二进制数据的文本时，你应该立即对其进行解码。而如果你的代码需要将文本作为二进制数据发送，那么就尽可能晚地对其进行编码。这使得你的代码在内部只与文本打交道，从而不必再去跟踪你所处理的数据类型。</p>
+<p>下一个问题是确保你知道你的代码中的字符串字面值是代表文本还是二进制数据。 你应当给任何代表二进制数据的字面值添加 <code class="docutils literal notranslate"><span class="pre">b</span></code> 前缀。 对于文本则应当给文本字面值添加 <code class="docutils literal notranslate"><span class="pre">u</span></code> 前缀。 （有一个 <a class="reference internal" href="../library/__future__.html#module-__future__" title="__future__: Future statement definitions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">__future__</span></code></a> 导入可以强制所有未指定前缀的字面值为 Unicode，但实际使用情况表明它并不像给所有字面值显式地添加 <code class="docutils literal notranslate"><span class="pre">b</span></code> 或 <code class="docutils literal notranslate"><span class="pre">u</span></code> 前缀那样有效）。</p>
+<p>对于打开文件你也需要小心。 在打开二进制文件时你可能并不总是会特意添加 <code class="docutils literal notranslate"><span class="pre">b</span></code> 模式 (例如，<code class="docutils literal notranslate"><span class="pre">rb</span></code> 表示二进制读取)。 在 Python 3 中，二进制文件和文本文件是截然不同且互不兼容的；详情参见 <a class="reference internal" href="../library/io.html#module-io" title="io: Core tools for working with streams."><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a> 模块。 因此，你 <strong>必须</strong> 决定一个文件要用于二进制访问 (允许读取和/或写入二进制数据) 还是文本访问 (允许读取和/或写入文本数据)。 你还应当使用 <a class="reference internal" href="../library/io.html#io.open" title="io.open"><code class="xref py py-func docutils literal notranslate"><span class="pre">io.open()</span></code></a> 来打开文件而不是使用内置的 <a class="reference internal" href="../library/functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 函数因为 <a class="reference internal" href="../library/io.html#module-io" title="io: Core tools for working with streams."><code class="xref py py-mod docutils literal notranslate"><span class="pre">io</span></code></a> 模块从 Python 2 到 3 是保持一致的而内置的 <a class="reference internal" href="../library/functions.html#open" title="open"><code class="xref py py-func docutils literal notranslate"><span class="pre">open()</span></code></a> 函数并非如此 (在 Python 3 中它实际上是 <a class="reference internal" href="../library/io.html#io.open" title="io.open"><code class="xref py py-func docutils literal notranslate"><span class="pre">io.open()</span></code></a>)。 请不要使用 <a class="reference internal" href="../library/codecs.html#codecs.open" title="codecs.open"><code class="xref py py-func docutils literal notranslate"><span class="pre">codecs.open()</span></code></a> 这种过时的做法因为它仅在保持与 Python 2.5 的兼容时才是必要的。</p>
+<p><code class="docutils literal notranslate"><span class="pre">str</span></code> 和 <code class="docutils literal notranslate"><span class="pre">bytes</span></code> 的构造器在 Python 2 和 3 中对相同的参数有不同的语义。 在 Python 2 中，向 <code class="docutils literal notranslate"><span class="pre">bytes</span></code> 传入一个整数会得到该整数的字符串表示形式: <code class="docutils literal notranslate"><span class="pre">bytes(3)</span> <span class="pre">==</span> <span class="pre">'3'</span></code>。 但在 Python 3 中，向 <code class="docutils literal notranslate"><span class="pre">bytes</span></code> 传入一个整数参数则会得到一个该整数所指定的长度的字节对象，并空字节填充: <code class="docutils literal notranslate"><span class="pre">bytes(3)</span> <span class="pre">==</span> <span class="pre">b'\x00\x00\x00'</span></code>。 当向 <code class="docutils literal notranslate"><span class="pre">str</span></code> 传入字节串对象时也同样需要注意。 在 Python 2 中你只是得到该字节串对象: <code class="docutils literal notranslate"><span class="pre">str(b'3')</span> <span class="pre">==</span> <span class="pre">b'3'</span></code>。 但在 Python 3 中你将得到该字节串对象的字符串表示形式: <code class="docutils literal notranslate"><span class="pre">str(b'3')</span> <span class="pre">==</span> <span class="pre">&quot;b'3'&quot;</span></code>。</p>
+<p>最后，二进制数据的索引需要仔细处理（切片 <strong>不需要</strong> 任何特殊处理）。在 Python 2 中 <code class="docutils literal notranslate"><span class="pre">b'123'[1]</span> <span class="pre">==</span> <span class="pre">b'2'</span></code>，而在 Python 3 中 <code class="docutils literal notranslate"><span class="pre">b'123'[1]</span> <span class="pre">==</span> <span class="pre">50</span></code>。 因为二进制数据只是二进制数的集合，Python 3 会返回你索引的字节的整数值。 但是在 Python 2 中，因为 <code class="docutils literal notranslate"><span class="pre">bytes</span> <span class="pre">==</span> <span class="pre">str</span></code>，索引会返回一个单项的字节片断。 <a class="reference external" href="https://pypi.org/project/six">six</a> 项目有一个名为 <code class="docutils literal notranslate"><span class="pre">six.indexbytes()</span></code> 的函数，它将像在 Python 3 中一样返回一个整数: <code class="docutils literal notranslate"><span class="pre">six.indexbytes(b'123',</span> <span class="pre">1)</span></code>。</p>
+<p>总结一下：</p>
+<ol class="arabic simple">
+<li><p>决定你的API中哪些采用文本，哪些采用二进制数据</p></li>
+<li><p>确保你对文本工作的代码也能对 <code class="docutils literal notranslate"><span class="pre">unicode</span></code> 工作，对二进制数据的代码在Python 2中能对 <code class="docutils literal notranslate"><span class="pre">bytes</span></code> 工作（关于每种类型不能使用的方法，见上表）。</p></li>
+<li><p>用 <code class="docutils literal notranslate"><span class="pre">b</span></code> 前缀标记所有二进制字词，用 <code class="docutils literal notranslate"><span class="pre">u</span></code> 前缀标记文本字词</p></li>
+<li><p>尽快将二进制数据解码为文本，尽可能晚地将文本编码为二进制数据</p></li>
+<li><p>使用 <a class="reference internal" href="../library/io.html#io.open" title="io.open"><code class="xref py py-func docutils literal notranslate"><span class="pre">io.open()</span></code></a> 打开文件，并确保在适当时候指定 <code class="docutils literal notranslate"><span class="pre">b</span></code> 模式。</p></li>
+<li><p>在对二进制数据进行索引时要小心</p></li>
+</ol>
+</section>
+<section id="use-feature-detection-instead-of-version-detection">
+<h4>使用特征检测而不是版本检测<a class="headerlink" href="#use-feature-detection-instead-of-version-detection" title="永久链接至标题">¶</a></h4>
+<p>你不可避免地会有一些代码需要根据运行的 Python 版本来选择要做什么。做到这一点的最好方法是对你运行的 Python 版本是否支持你所需要的东西进行特征检测。如果由于某种原因这不起作用，那么你应该让版本检测针对 Python 2 而不是 Python 3。为了帮助解释这个问题，让我们看一个例子。</p>
+<p>假设你需要访问 <a class="reference internal" href="../library/importlib.html#module-importlib" title="importlib: The implementation of the import machinery."><code class="xref py py-mod docutils literal notranslate"><span class="pre">importlib</span></code></a> 的一个功能，该功能自Python 3.3开始在Python的标准库中提供，并且通过PyPI上的 <a class="reference external" href="https://pypi.org/project/importlib2">importlib2</a> 提供给Python 2。你可能会想写代码来访问例如 <a class="reference internal" href="../library/importlib.html#module-importlib.abc" title="importlib.abc: Abstract base classes related to import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">importlib.abc</span></code></a> 模块，方法如下:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">abc</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">importlib2</span> <span class="kn">import</span> <span class="n">abc</span>
+</pre></div>
+</div>
+<p>这段代码的问题是，当Python 4出来的时候会发生什么？最好是将Python 2作为例外情况，而不是Python 3，并假设未来的Python版本与Python 3的兼容性比Python 2更强:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">abc</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">importlib2</span> <span class="kn">import</span> <span class="n">abc</span>
+</pre></div>
+</div>
+<p>不过，最好的解决办法是根本不做版本检测，而是依靠特征检测。这就避免了任何潜在的版本检测错误的问题，并有助于保持你对未来的兼容:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">abc</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">importlib2</span> <span class="kn">import</span> <span class="n">abc</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="prevent-compatibility-regressions">
+<h3>防止兼容性退步<a class="headerlink" href="#prevent-compatibility-regressions" title="永久链接至标题">¶</a></h3>
+<p>一旦你完全翻译了你的代码，使之与 Python 3 兼容，你将希望确保你的代码不会退步，不会在 Python 3上停止工作。如果你有一个依赖关系阻碍了你目前在Python 3上的实际运行，那就更是如此了。</p>
+<p>为了帮助保持兼容，你创建的任何新模块都应该在其顶部至少有以下代码块:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+</pre></div>
+</div>
+<p>你也可以在运行Python 2时使用 <code class="docutils literal notranslate"><span class="pre">-3</span></code> 标志，对你的代码在执行过程中引发的各种兼容性问题进行警告。如果你用 <code class="docutils literal notranslate"><span class="pre">-Werror</span></code> 把警告变成错误，那么你可以确保你不会意外地错过一个警告。</p>
+<p>你也可以使用 <a class="reference external" href="https://pypi.org/project/pylint">Pylint</a> 项目和它的 <code class="docutils literal notranslate"><span class="pre">--py3k</span></code> 标志来提示你的代码，当你的代码开始偏离 Python 3 的兼容性时，就会收到警告。这也避免了你不得不定期在你的代码上运行 <a class="reference external" href="https://python-modernize.readthedocs.io/">Modernize</a> 或 <a class="reference external" href="https://python-future.org/automatic_conversion.html">Futurize</a> 来捕捉兼容性的退步。这确实要求你只支持Python 2.7和Python 3.4或更新的版本，因为这是Pylint支持的最小Python版本。</p>
+</section>
+<section id="check-which-dependencies-block-your-transition">
+<h3>检查哪些依赖性会阻碍你的过渡<a class="headerlink" href="#check-which-dependencies-block-your-transition" title="永久链接至标题">¶</a></h3>
+<p>在你使你的代码与 Python 3 兼容**之后**，你应该开始关心你的依赖关系是否也被移植了。 <a class="reference external" href="https://pypi.org/project/caniusepython3">caniusepython3</a> 项目的建立是为了帮助你确定哪些项目——直接或间接地——阻碍了你对Python 3的支持。它既有一个命令行工具，也有一个在 <a class="reference external" href="https://caniusepython3.com">https://caniusepython3.com</a> 的网页界面。</p>
+<p>该项目还提供了一些代码，你可以将其集成到你的测试套件中，这样，当你不再有依赖关系阻碍你使用Python 3时，你将有一个失败的测试。这使你不必手动检查你的依赖性，并在你可以开始在Python 3上运行时迅速得到通知。</p>
+</section>
+<section id="update-your-setup-py-file-to-denote-python-3-compatibility">
+<h3>更新你的 <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> 文件以表示对Python 3的兼容<a class="headerlink" href="#update-your-setup-py-file-to-denote-python-3-compatibility" title="永久链接至标题">¶</a></h3>
+<p>一旦你的代码在 Python 3 下工作，你应该更新你 <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> 中的分类器，使其包含 <code class="docutils literal notranslate"><span class="pre">Programming</span> <span class="pre">Language</span> <span class="pre">::</span> <span class="pre">Python</span> <span class="pre">::</span> <span class="pre">3</span></code> 并不指定单独的 Python 2 支持。这将告诉使用你的代码的人，你支持Python 2 <strong>和</strong> 3。理想情况下，你也希望为你现在支持的Python的每个主要/次要版本添加分类器。</p>
+</section>
+<section id="use-continuous-integration-to-stay-compatible">
+<h3>使用持续集成以保持兼容<a class="headerlink" href="#use-continuous-integration-to-stay-compatible" title="永久链接至标题">¶</a></h3>
+<p>一旦你能够完全在 Python 3 下运行，你将会希望确保你的代码在 Python 2 和 3 下总是能够正常工作。 在多个 Python 解释器下运行测试的最佳工具可能就是 <a class="reference external" href="https://pypi.org/project/tox">tox</a>。 然后你可以将 tox 集成到你的持续集成系统中，这样你就不会意外地破坏对 Python 2 或 3 的支持。</p>
+<p>你可能还想在 Python 3 解释器中使用 <code class="docutils literal notranslate"><span class="pre">-bb``标志，以便在你将bytes与string或bytes与int进行比较时触发一个异常（后者从</span> <span class="pre">Python</span> <span class="pre">3.5</span> <span class="pre">开始可用）。默认情况下，类型不同的比较只是简单地返回``False</span></code>，但是如果你在文本/二进制数据处理或字节的索引分离中犯了一个错误，你就不容易发现这个错误。当这些类型的比较发生时，这个标志会触发一个异常，使错误更容易被发现。</p>
+</section>
+<section id="consider-using-optional-static-type-checking">
+<h3>考虑使用可选的静态类型检查<a class="headerlink" href="#consider-using-optional-static-type-checking" title="永久链接至标题">¶</a></h3>
+<p>另一个帮助移植你的代码的办法是在你的代码上使用 <a class="reference internal" href="../glossary.html#term-static-type-checker"><span class="xref std std-term">static type checker</span></a> 如 <a class="reference external" href="https://mypy-lang.org/">mypy</a> 或 <a class="reference external" href="https://github.com/google/pytype">pytype</a>。 这些工具可以用来分析你的代码，就像它在 Python 2 中运行一样，然后你可以第二次运行这个工具，就像你的代码在 Python 3 中运行一样。 通过像这样两次运行静态类型检查器，你可以发现你在不同的 Python 版本中是否错误地使用了二进制数据类型。 如果你在你的代码中添加了可选的类型提示，你还可以明确说明你的 API 是使用文本还是二进制数据，这有助于确保在两个版本的 Python 中所有的功能都符合预期。.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../contents.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">如何将 Python 2 代码移植到 Python 3</a><ul>
+<li><a class="reference internal" href="#the-short-explanation">简要说明</a></li>
+<li><a class="reference internal" href="#details">详情</a><ul>
+<li><a class="reference internal" href="#different-versions-of-python-2">Python 2 的不同版本</a></li>
+<li><a class="reference internal" href="#make-sure-you-specify-the-proper-version-support-in-your-setup-py-file">确保你在你的 <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> 文件中指定适当的版本支持</a></li>
+<li><a class="reference internal" href="#have-good-test-coverage">良好的测试覆盖率</a></li>
+<li><a class="reference internal" href="#be-aware-of-the-differences-between-python-2-and-3">了解 Python 2 和 Python 3 之间的区别</a></li>
+<li><a class="reference internal" href="#update-your-code">更新代码</a><ul>
+<li><a class="reference internal" href="#division">除法</a></li>
+<li><a class="reference internal" href="#text-versus-binary-data">文本与二进制数据</a></li>
+<li><a class="reference internal" href="#use-feature-detection-instead-of-version-detection">使用特征检测而不是版本检测</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prevent-compatibility-regressions">防止兼容性退步</a></li>
+<li><a class="reference internal" href="#check-which-dependencies-block-your-transition">检查哪些依赖性会阻碍你的过渡</a></li>
+<li><a class="reference internal" href="#update-your-setup-py-file-to-denote-python-3-compatibility">更新你的 <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> 文件以表示对Python 3的兼容</a></li>
+<li><a class="reference internal" href="#use-continuous-integration-to-stay-compatible">使用持续集成以保持兼容</a></li>
+<li><a class="reference internal" href="#consider-using-optional-static-type-checking">考虑使用可选的静态类型检查</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一个主题</h4>
+    <p class="topless"><a href="index.html"
+                          title="上一章">Python 指南</a></p>
+  </div>
+  <div>
+    <h4>下一个主题</h4>
+    <p class="topless"><a href="cporting.html"
+                          title="下一章">将扩展模块移植到 Python 3</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>当前页面</h3>
+    <ul class="this-page-menu">
+      <li><a href="../bugs.html">报告 Bug</a></li>
+      <li>
+        <a href="https://github.com/python/cpython/blob/main/Doc/howto/pyporting.rst"
+            rel="nofollow">显示源码
+        </a>
+      </li>
+    </ul>
+  </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>  
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总目录"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python 模块索引"
+             >模块</a> |</li>
+        <li class="right" >
+          <a href="cporting.html" title="将扩展模块移植到 Python 3"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Python 指南"
+             >上一页</a> |</li>
+
+          <li><img src="../_static/py.svg" alt="python logo" style="vertical-align: middle; margin-top: -1px"/></li>
+          <li><a href="https://www.python.org/">Python</a> &#187;</li>
+          <li class="switchers">
+            <div class="language_switcher_placeholder"></div>
+            <div class="version_switcher_placeholder"></div>
+          </li>
+          <li>
+              
+          </li>
+    <li id="cpython-language-and-version">
+      <a href="../index.html">3.12.1 Documentation</a> &#187;
+    </li>
+
+          <li class="nav-item nav-item-1"><a href="index.html" >Python 指南</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">如何将 Python 2 代码移植到 Python 3</a></li>
+                <li class="right">
+                    
+
+    <div class="inline-search" role="search">
+        <form class="inline-search" action="../search.html" method="get">
+          <input placeholder="快速搜索" aria-label="快速搜索" type="search" name="q" id="search-box" />
+          <input type="submit" value="转向" />
+        </form>
+    </div>
+                     |
+                </li>
+            <li class="right">
+<label class="theme-selector-label">
+    Theme
+    <select class="theme-selector" oninput="activateTheme(this.value)">
+        <option value="auto" selected>Auto</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+    </select>
+</label> |</li>
+            
+      </ul>
+    </div>  
+    <div class="footer">
+    &copy; <a href="../copyright.html">版权所有</a> 2001-2024, Python Software Foundation.
+    <br />
+    This page is licensed under the Python Software Foundation License Version 2.
+    <br />
+    Examples, recipes, and other code in the documentation are additionally licensed under the Zero Clause BSD License.
+    <br />
+    See <a href="/license.html">History and License</a> for more information.<br />
+    <br />
+
+    The Python Software Foundation is a non-profit corporation.
+<a href="https://www.python.org/psf/donations/">Please donate.</a>
+<br />
+    <br />
+
+    最后更新于 Jan 20, 2024 (09:05 UTC).
+    <a href="/bugs.html">Found a bug</a>?
+    <br />
+
+    由 <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0创建。
+    </div>
+
+  </body>
+</html>
